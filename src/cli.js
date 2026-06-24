@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { registerAuto } from "./commands/auto.js";
 import { registerDoctor } from "./commands/doctor.js";
 import { registerInit } from "./commands/init.js";
 import { registerMux } from "./commands/mux.js";
@@ -8,6 +9,7 @@ import { registerPlan } from "./commands/plan.js";
 import { registerProbe } from "./commands/probe.js";
 import { registerRender } from "./commands/render.js";
 import { registerScript } from "./commands/script.js";
+import { registerSource } from "./commands/source.js";
 import { registerSubtitles } from "./commands/subtitles.js";
 import { packageRoot } from "./utils/paths.js";
 
@@ -23,7 +25,9 @@ export async function runCli(argv = process.argv) {
 
   registerInit(program);
   registerPlan(program);
+  registerAuto(program);
   registerScript(program);
+  registerSource(program);
   registerSubtitles(program);
   registerMux(program);
   registerRender(program);

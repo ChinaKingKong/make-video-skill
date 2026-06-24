@@ -16,6 +16,10 @@ export async function detectBackends() {
     ffmpeg,
     ffprobe,
     aiProviders: configuredProviders(),
+    footageProviders: {
+      pexels: providerKeyStatus("PEXELS_API_KEY", "Pexels Videos API"),
+      pixabay: providerKeyStatus("PIXABAY_API_KEY", "Pixabay Videos API"),
+    },
     indexTts,
     hyperframes,
     jianying,
@@ -107,4 +111,14 @@ function commandInstallHint(command, error) {
     return `${command} not found. Install it and ensure it is on PATH.`;
   }
   return `${command} check failed.`;
+}
+
+function providerKeyStatus(env, label) {
+  return {
+    ok: Boolean(process.env[env]),
+    required: false,
+    apiKeyEnv: env,
+    detail: process.env[env] ? `${env} is set` : `${env} is not set`,
+    degradation: `Without ${env}, ${label} automatic downloads are skipped and manual fallback sources are recorded.`,
+  };
 }

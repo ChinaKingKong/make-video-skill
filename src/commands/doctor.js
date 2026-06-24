@@ -20,6 +20,9 @@ export function registerDoctor(program) {
       for (const [name, provider] of Object.entries(result.aiProviders)) {
         printStatus(`AI:${name}`, provider);
       }
+      for (const [name, provider] of Object.entries(result.footageProviders)) {
+        printStatus(`Footage:${name}`, provider);
+      }
       printStatus("IndexTTS", result.indexTts);
       printStatus("HyperFrames", result.hyperframes);
       printStatus("JianYing", result.jianying);
