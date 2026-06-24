@@ -1,0 +1,28 @@
+{
+  "recommended_threshold": 0.33,
+  "should_trigger": [
+    "帮我做一个 3 分钟中文 AI 新闻解说视频，要配音、字幕、素材和最终 mp4。",
+    "Turn this product page and screenshots into a short promo video with captions.",
+    "Use my footage folder to make a 9:16 social cut with music and burned-in subtitles.",
+    "给这个视频替换旁白并把音频长度贴合原视频。",
+    "用这张人物照片和这段音频生成一个口型同步的 talking head 视频。",
+    "Take this speaker video and new narration, then generate lip-synced dubbing before final editing.",
+    "Create a JianYing/剪映 draft with titles, transitions, subtitles, and narration.",
+    "Make a narrated explainer from this script using IndexTTS and b-roll.",
+    "把这篇文章改成适合视频播出的自然口播逐字稿，并用它做成带字幕的短视频。",
+    "给这个视频加 HyperFrames 动效标题、转场、数据卡和关键词字幕，然后导出最终 mp4。",
+    "Use HyperFrames/html-video to render animated callouts and kinetic title cards for this promo edit."
+  ],
+  "should_not_trigger": [
+    "只帮我写一篇公众号文章，不需要视频。",
+    "Generate a single hero image for this landing page.",
+    "Explain what JianYing is.",
+    "Summarize these AI payment sources into bullet points only.",
+    "Brainstorm ten video ideas, but do not make any files."
+  ],
+  "near_neighbor": [
+    "Write a video script only, no edit or media production yet.",
+    "Research this topic for a future video but do not create video assets.",
+    "Create a storyboard image sheet, not a video."
+  ]
+}

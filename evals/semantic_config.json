@@ -1,0 +1,204 @@
+{
+  "optimizer_hints": {
+    "capability": "Create, edit, package, or repair video deliverables",
+    "inputs": [
+      "video brief",
+      "script",
+      "article",
+      "written draft",
+      "footage folder",
+      "existing video",
+      "screenshots",
+      "voice reference"
+    ],
+    "trigger_actions": [
+      "make a video",
+      "edit a video",
+      "create final mp4",
+      "add subtitles",
+      "replace voiceover",
+      "generate lip sync",
+      "create talking head",
+      "adapt article to spoken narration",
+      "create JianYing draft"
+    ],
+    "exclusions": [
+      "text-only writing",
+      "image-only generation",
+      "generic video advice",
+      "research without media output"
+    ],
+    "artifacts": [
+      "final.mp4",
+      "subtitles.srt",
+      "overlay.mov",
+      "JianYing draft",
+      "footage_manifest.md"
+    ]
+  },
+  "fallback_positive_concepts": [
+    "video_creation",
+    "video_editing",
+    "spoken_script_adaptation",
+    "captions_voiceover",
+    "audio_replacement",
+    "talking_head",
+    "jianying_draft"
+  ],
+  "positive_concepts": {
+    "video_creation": {
+      "weight": 0.3,
+      "phrases": [
+        "make a video",
+        "create a video",
+        "制作视频",
+        "做一个视频",
+        "做一个",
+        "视频",
+        "final mp4",
+        "最终 mp4",
+        "short video",
+        "social clip",
+        "social cut",
+        "promo video",
+        "explainer video"
+      ]
+    },
+    "spoken_script_adaptation": {
+      "weight": 0.14,
+      "phrases": [
+        "文章改成口播",
+        "口播逐字稿",
+        "适合视频播出",
+        "自然口播",
+        "article to video",
+        "spoken narration",
+        "narration script",
+        "TTS-ready script"
+      ]
+    },
+    "video_editing": {
+      "weight": 0.2,
+      "phrases": [
+        "edit this video",
+        "剪辑",
+        "原视频",
+        "final editing",
+        "b-roll",
+        "montage",
+        "transitions",
+        "lower thirds",
+        "animated text",
+        "motion graphics"
+      ]
+    },
+    "captions_voiceover": {
+      "weight": 0.2,
+      "phrases": [
+        "subtitles",
+        "captions",
+        "字幕",
+        "voiceover",
+        "旁白",
+        "配音",
+        "IndexTTS",
+        "audio replacement"
+      ]
+    },
+    "audio_replacement": {
+      "weight": 0.18,
+      "phrases": [
+        "replace voiceover",
+        "替换旁白",
+        "音频长度",
+        "贴合原视频",
+        "audio fitting",
+        "fit audio",
+        "voiceover repair"
+      ]
+    },
+    "talking_head": {
+      "weight": 0.28,
+      "phrases": [
+        "talking head",
+        "lip sync",
+        "lip-synced",
+        "口型同步",
+        "说话人",
+        "人物照片",
+        "speaker video",
+        "new narration",
+        "dubbing"
+      ]
+    },
+    "jianying_draft": {
+      "weight": 0.08,
+      "phrases": [
+        "JianYing",
+        "剪映",
+        "剪映草稿",
+        "editable draft",
+        "draft with titles"
+      ]
+    },
+    "footage_sourcing": {
+      "weight": 0.06,
+      "phrases": [
+        "footage",
+        "素材",
+        "stock video",
+        "official footage",
+        "source b-roll"
+      ]
+    }
+  },
+  "negative_concepts": {
+    "text_only": {
+      "weight": 0.35,
+      "exclusive": true,
+      "phrases": [
+        "article only",
+        "write an article",
+        "公众号文章",
+        "text only",
+        "summarize",
+        "bullet points only",
+        "translate"
+      ]
+    },
+    "image_only": {
+      "weight": 0.3,
+      "exclusive": true,
+      "phrases": [
+        "single image",
+        "hero image",
+        "generate an image",
+        "image only",
+        "poster only"
+      ]
+    },
+    "advice_only": {
+      "weight": 0.28,
+      "exclusive": true,
+      "phrases": [
+        "explain what",
+        "how does",
+        "generic advice",
+        "brainstorm",
+        "ideas only",
+        "do not make files"
+      ]
+    },
+    "research_only": {
+      "weight": 0.24,
+      "exclusive": true,
+      "phrases": [
+        "research this topic",
+        "sources only",
+        "for a future video",
+        "no edit",
+        "no media production"
+      ]
+    }
+  }
+}

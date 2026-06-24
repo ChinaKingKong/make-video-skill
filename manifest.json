@@ -1,0 +1,23 @@
+{
+  "name": "make-video",
+  "version": "1.1.1",
+  "owner": "lizhigang",
+  "updated_at": "2026-06-24",
+  "status": "active",
+  "maturity_tier": "production",
+  "lifecycle_stage": "production",
+  "context_budget_tier": "production",
+  "review_cadence": "monthly",
+  "category": "media-production",
+  "complexity_tier": "complex",
+  "target_platforms": [
+    "openai",
+    "agent-skills-compatible"
+  ],
+  "factory_components": [
+    "agents",
+    "references",
+    "scripts",
+    "evals"
+  ]
+}

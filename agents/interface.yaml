@@ -1,0 +1,22 @@
+interface:
+  display_name: "通用视频制作"
+  short_description: "制作、剪辑、包装视频，支持文章转口播稿、素材搜集、配音、字幕、HyperFrames 动效、剪映草稿和最终 MP4。"
+  default_prompt: "帮我制作一个视频：先明确 brief、平台、时长、比例、素材、配音、字幕和导出要求；如果有文章或书面稿，先改成自然口播逐字稿；再选择本地渲染、HyperFrames/html-video 动效层、剪映/JianYing 草稿或混合流程；按需搜集合法素材和记录 footage_manifest；制作脚本、shot plan、配音、字幕、动效、音效和转场；最后导出并用 ffprobe 与关键帧截图做 QC。"
+compatibility:
+  canonical_format: "agent-skills"
+  adapter_targets:
+    - "openai"
+    - "generic"
+  activation:
+    mode: "manual"
+    paths: []
+  execution:
+    context: "inline"
+    shell: "bash"
+  trust:
+    source_tier: "local"
+    remote_inline_execution: "forbid"
+    remote_metadata_policy: "allow-metadata-only"
+  degradation:
+    openai: "metadata-adapter"
+    generic: "neutral-source"
