@@ -51,19 +51,19 @@ make-video doctor --strict
 
 ## Demo 视频
 
-下面是 `demo/` 目录中两个完整视频的轻量预览版，方便在 GitHub 或 npm 页面快速查看效果。原始完整视频体积较大，不随包发布。
+GitHub 和 npm 的 README 会过滤第三方播放器脚本，因此这里使用 GIF 动图做内嵌预览；点击动图可以打开对应 MP4 预览文件。原始完整视频体积较大，不随包发布。
 
 ### Demo 1
 
-<video src="demo/final-preview.mp4" controls muted playsinline width="720"></video>
+[![Demo 1 preview](demo/final-preview.gif)](demo/final-preview.mp4)
 
-[无法播放时打开视频文件](demo/final-preview.mp4)
+[打开 MP4 预览](demo/final-preview.mp4)
 
 ### Demo 2
 
-<video src="demo/final-2-preview.mp4" controls muted playsinline width="720"></video>
+[![Demo 2 preview](demo/final-2-preview.gif)](demo/final-2-preview.mp4)
 
-[无法播放时打开视频文件](demo/final-2-preview.mp4)
+[打开 MP4 预览](demo/final-2-preview.mp4)
 
 ## 使用示例
 
