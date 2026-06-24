@@ -2,12 +2,14 @@ import { z } from "zod";
 import { createChatCompletion, hasProviderKey } from "./providers.js";
 import { loadReferenceContext } from "../workflow/resources.js";
 
+const textField = z.preprocess((value) => stringifyStructuredValue(value), z.string());
+
 const videoPlanSchema = z.object({
-  brief: z.string(),
-  script: z.string(),
-  shot_plan: z.string(),
-  subtitle_notes: z.string(),
-  production_notes: z.string(),
+  brief: textField,
+  script: textField,
+  shot_plan: textField,
+  subtitle_notes: textField,
+  production_notes: textField,
 });
 
 export function hasOpenAIKey() {
@@ -75,4 +77,37 @@ function parseJson(content) {
     if (!match) throw new Error("AI provider did not return valid JSON.");
     return JSON.parse(match[0]);
   }
+}
+
+function stringifyStructuredValue(value) {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) {
+    return value.map((item, index) => formatStructuredItem(item, index)).join("\n\n");
+  }
+  if (value && typeof value === "object") {
+    return Object.entries(value)
+      .map(([key, item]) => `## ${key}\n\n${stringifyStructuredValue(item)}`)
+      .join("\n\n");
+  }
+  if (value == null) return "";
+  return String(value);
+}
+
+function formatStructuredItem(item, index) {
+  if (typeof item === "string") return `${index + 1}. ${item}`;
+  if (item && typeof item === "object") {
+    const title = item.title || item.name || item.scene || item.section || `Item ${index + 1}`;
+    const body = Object.entries(item)
+      .filter(([key]) => !["title", "name", "scene", "section"].includes(key))
+      .map(([key, value]) => `- ${key}: ${inlineValue(value)}`)
+      .join("\n");
+    return `### ${title}${body ? `\n\n${body}` : ""}`;
+  }
+  return `${index + 1}. ${String(item)}`;
+}
+
+function inlineValue(value) {
+  if (Array.isArray(value)) return value.map((item) => inlineValue(item)).join("; ");
+  if (value && typeof value === "object") return JSON.stringify(value);
+  return String(value ?? "");
 }
