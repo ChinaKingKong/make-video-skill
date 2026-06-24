@@ -73,13 +73,58 @@ GitHub 和 npm 的 README 会过滤第三方播放器脚本，因此这里使用
 
 ## 一键生成视频
 
-`make-video auto` 是推荐入口。它的目标是不要求用户提前准备视频素材，也不要求提前准备旁白音频：CLI 会先根据主题生成脚本和镜头规划，再按主题去素材站搜索下载视频素材，生成 `render/base.mp4`、`subtitles.srt` 和 `footage_manifest.md`。
+`make-video auto` 是推荐入口。它的目标是不要求用户提前准备视频素材，也不要求提前准备旁白音频：只要给一段完整视频需求，CLI 会先解析主题、时长、封面、素材目录、字幕和配音要求，再生成脚本和镜头规划，按主题去素材站搜索下载视频素材，融合本地图片/视频资源，生成 `render/base.mp4`、无标点字幕、IndexTTS 旁白、FFmpeg 预览成片和 JianYing 草稿脚本。
 
 自动素材下载优先使用 Pexels / Pixabay 官方 API；`references/sourcing.md` 中列出的 Mixkit、Coverr、Videvo、爱给网等素材站会作为 fallback 资源写入 `footage_manifest.md`，方便人工补充或后续自动化扩展。
 
 自动配音依赖本地 TTS 后端。配置 `INDEXTTS_HOME` 后，`auto` 会在没有现成音频时调用 IndexTTS/IndexTTS2 合成 `audio/voiceover.wav`，再把字幕和旁白一起渲染成 `exports/final.mp4`。未配置 TTS 时，CLI 会先产出口播稿、字幕、基础视频和无旁白 preview，不会要求你提前准备音频文件。
 
-### 完整自动流程
+### 推荐用法：完整提示词直出视频
+
+把完整需求写进一个 brief 文件，适合 5-10 分钟以上的视频：
+
+```bash
+cat > zhipu-brief.txt <<'EOF'
+帮我使用 make-video 以及 jianying-editor skill 制作一个关于如下主题内容的视频，根据主题到网络上采集对应的视频资源然后剪辑，配音使用 index-tts 参考语音文件使用 /Users/lizhigang/Downloads/Voices/新闻-铿锵.mp3，并给视频添加字幕和对应的动效。
+
+主题：智谱市值万亿，凭什么？
+时长：8分钟左右
+视频资源来源：参照 make-video 中的素材来源网站获取真实场景的视频、/Users/lizhigang/Downloads/Source 中的图片资源也要融合进视频内容中。
+配音：使用本地 index-tts 配合参考语音文件 /Users/lizhigang/Downloads/Voices/新闻-铿锵.mp3，配音要一次生成不要拼接
+字幕：添加动效字幕，字幕内容不要标点符号
+首帧封面：HP01.png
+视觉包装要求：标题动画、lower thirds、关键词/数据 callout、动态字幕、转场、避免静态文字块
+内容：精炼总结提取视频文字内容
+
+视频文字内容：
+6000亿的时候，几乎所有人都觉得智谱太贵了，然而它涨到了万亿。
+索罗斯曾经说：“金融市场的价格总是错的，但错误可以自我强化到一个相当长的阶段，甚至最终把自己变成对的。”
+6月22日上午，端午假期后第一个交易日，智谱港股开盘即涨超13%，股价突破2380港元，总市值正式站上1万亿港元。上市不到半年，涨幅超过1900%。
+EOF
+
+export DEEPSEEK_API_KEY="你的 DeepSeek Key"
+export PEXELS_API_KEY="你的 Pexels Key"
+export INDEXTTS_HOME="/path/to/index-tts"
+
+npx make-video auto \
+  --provider deepseek \
+  --model deepseek-chat \
+  --brief ./zhipu-brief.txt \
+  --ratio 16:9 \
+  --source-dir /Users/lizhigang/Downloads/Source \
+  --voice /Users/lizhigang/Downloads/Voices/新闻-铿锵.mp3 \
+  --out ./zhipu-video
+```
+
+`auto` 会从 brief 中自动识别 `主题：...` 作为素材搜索词，从 `时长：8分钟左右` 推断约 480 秒，并在 `/Users/lizhigang/Downloads/Source` 中查找 `首帧封面：HP01.png`。字幕默认去掉标点，同时生成 `subtitles.srt` 和带淡入淡出样式的 `subtitles.ass`。
+
+生成 JianYing 草稿脚本后可运行：
+
+```bash
+python ./zhipu-video/jianying/build_draft.py
+```
+
+### 参数化一键流程
 
 ```bash
 export DEEPSEEK_API_KEY="你的 DeepSeek Key"
@@ -122,13 +167,7 @@ ai-demo/
 
 如果没有配置素材 API key，`auto` 不会中断整体规划，会在 `footage_manifest.md` 中记录可用素材站、搜索链接和版权检查提示。设置 `PEXELS_API_KEY` 或 `PIXABAY_API_KEY` 后重新运行即可自动下载素材。
 
-如果提示词中写了 `时长：8分钟左右`，`auto` 会在未显式传 `--duration` 时自动推断为约 480 秒；写了 `主题：...` 时，会优先用主题行生成素材搜索词。默认会尝试融合 `/Users/lizhigang/Downloads/Source` 下的图片和视频；也可以用 `--source-dir` 指定其它目录。字幕默认去掉标点，并额外生成带淡入淡出样式的 `subtitles.ass` 用于 FFmpeg 预览渲染，同时保留无标点 `subtitles.srt` 供 JianYing 导入。
-
-生成 JianYing 草稿脚本后可运行：
-
-```bash
-python ./ai-demo/jianying/build_draft.py
-```
+如果提示词中写了 `主题：...`、`时长：...分钟`、`首帧封面：...`，`auto` 会优先使用这些结构化信息。默认会尝试融合 `/Users/lizhigang/Downloads/Source` 下的图片和视频；也可以用 `--source-dir` 指定其它目录。
 
 ### 只生成脚本和镜头规划
 
