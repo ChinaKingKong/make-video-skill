@@ -138,6 +138,28 @@ npx make-video plan --provider claude --model claude-3-5-haiku-latest \
   --out ./ai-demo
 ```
 
+### 一键串联示例
+
+下面命令会把 `plan`、`subtitles` 和 `render` 串起来，一次性生成项目规划、字幕，并输出最终 MP4。注意：当前 CLI 不会自动生成真实素材和旁白音频，执行前需要先准备好 `./ai-demo/render/base.mp4` 和 `./ai-demo/audio/voiceover.wav`。
+
+```bash
+export DEEPSEEK_API_KEY="你的 DeepSeek Key"
+
+npx make-video plan --provider deepseek --model deepseek-chat \
+  --brief "做一个 90 秒 AI 工具演示短视频，竖屏，中文旁白，带字幕" \
+  --out ./ai-demo && \
+npx make-video subtitles \
+  --script ./ai-demo/script.md \
+  --duration 90 \
+  --out ./ai-demo/subtitles.srt && \
+npx make-video render \
+  --project ./ai-demo \
+  --video ./ai-demo/render/base.mp4 \
+  --audio ./ai-demo/audio/voiceover.wav \
+  --subtitles ./ai-demo/subtitles.srt \
+  --out ./ai-demo/exports/final.mp4
+```
+
 ## 适用场景
 
 适合使用本 Skill 的任务包括：
