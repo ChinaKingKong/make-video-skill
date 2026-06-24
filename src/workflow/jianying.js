@@ -104,7 +104,7 @@ skill_candidates = [
     os.path.join(current_dir, "skills", "jianying-editor"),
     os.path.abspath(".agent/skills/jianying-editor"),
     os.path.dirname(current_dir),
-    "/Users/lizhigang/.codex/skills/jianying-editor",
+    os.path.expanduser("~/.codex/skills/jianying-editor"),
 ]
 
 scripts_path = None

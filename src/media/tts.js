@@ -1,9 +1,10 @@
 import path from "node:path";
 import fs from "fs-extra";
 import { execa } from "execa";
+import { expandHomePath } from "../utils/paths.js";
 
-export const defaultIndexTtsHome = "/Users/lizhigang/Library/index-tts";
-export const defaultVoiceReference = "/Users/lizhigang/Downloads/Voices/新闻-铿锵.mp3";
+export const defaultIndexTtsHome = "~/Library/index-tts";
+export const defaultVoiceReference = "~/Downloads/Voices/新闻-铿锵.mp3";
 
 export async function synthesizeIndexTts({
   textFile,
@@ -13,8 +14,9 @@ export async function synthesizeIndexTts({
   device = process.env.INDEXTTS_DEVICE || "mps",
   modelDir = process.env.INDEXTTS_MODEL_DIR || "checkpoints",
 } = {}) {
-  const cli = path.join(home, "indextts", "cli_v2.py");
-  const voiceReference = voice || process.env.INDEXTTS_VOICE || process.env.MAKE_VIDEO_TTS_VOICE || defaultVoiceReference;
+  const resolvedHome = expandHomePath(home);
+  const cli = path.join(resolvedHome, "indextts", "cli_v2.py");
+  const voiceReference = expandHomePath(voice || process.env.INDEXTTS_VOICE || process.env.MAKE_VIDEO_TTS_VOICE || defaultVoiceReference);
 
   if (!(await fs.pathExists(cli))) {
     return {
@@ -22,7 +24,7 @@ export async function synthesizeIndexTts({
       skipped: true,
       reason: `IndexTTS CLI not found at ${cli}. Set INDEXTTS_HOME to enable automatic voiceover.`,
       cli,
-      home,
+      home: resolvedHome,
     };
   }
 
@@ -32,7 +34,7 @@ export async function synthesizeIndexTts({
       skipped: true,
       reason: `Voice reference not found at ${voiceReference}. Pass --voice or set INDEXTTS_VOICE.`,
       cli,
-      home,
+      home: resolvedHome,
       voice: voiceReference,
     };
   }
@@ -40,7 +42,7 @@ export async function synthesizeIndexTts({
   await fs.ensureDir(path.dirname(output));
 
   const firstAttempt = await runIndexTts({
-    home,
+    home: resolvedHome,
     cli,
     textFile,
     output,
@@ -51,7 +53,7 @@ export async function synthesizeIndexTts({
   if (firstAttempt.ok || device === "cpu") return firstAttempt;
 
   const retry = await runIndexTts({
-    home,
+    home: resolvedHome,
     cli,
     textFile,
     output,

@@ -38,12 +38,12 @@ Use FFmpeg subtitle filters for simple burned-in captions or generate animated t
 
 Use IndexTTS/IndexTTS2 when the user asks for text-to-speech, reference-voice cloning, or a narrated version. Use an existing checkout if the user gives one and it works; if the path is missing or broken, create or reuse a local checkout in the project workspace and say so.
 
-First inspect `INDEXTTS_HOME`, defaulting to `/Users/lizhigang/Library/index-tts`, before rebuilding or recloning IndexTTS. This checkout already has the `uv` environment, IndexTTS-2 checkpoints, auxiliary cache, and Apple MPS validation. Unless the user changes it, `/Users/lizhigang/Downloads/Voices/新闻-铿锵.mp3` is the default voice reference for similar Chinese news/explainer runs.
+First inspect `INDEXTTS_HOME`, defaulting to `~/Library/index-tts`, before rebuilding or recloning IndexTTS. This checkout already has the `uv` environment, IndexTTS-2 checkpoints, auxiliary cache, and Apple MPS validation. Unless the user changes it, `~/Downloads/Voices/新闻-铿锵.mp3` is the default voice reference for similar Chinese news/explainer runs.
 
 Recommended IndexTTS2 CLI pattern:
 
 ```bash
-cd "${INDEXTTS_HOME:-/Users/lizhigang/Library/index-tts}"
+cd "${INDEXTTS_HOME:-~/Library/index-tts}"
 uv run python indextts/cli_v2.py synth \
   --text-file /abs/path/narration.txt \
   --voice /abs/path/reference_voice.mp3 \

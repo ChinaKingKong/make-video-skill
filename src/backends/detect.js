@@ -2,6 +2,7 @@ import path from "node:path";
 import fs from "fs-extra";
 import { execa } from "execa";
 import { configuredProviders } from "../ai/providers.js";
+import { expandHomePath } from "../utils/paths.js";
 
 export async function detectBackends() {
   const [ffmpeg, ffprobe, indexTts, hyperframes, jianying] = await Promise.all([
@@ -49,7 +50,7 @@ async function detectCommand(command, args, options = {}) {
 }
 
 async function detectIndexTts() {
-  const home = process.env.INDEXTTS_HOME || "/Users/lizhigang/Library/index-tts";
+  const home = expandHomePath(process.env.INDEXTTS_HOME || "~/Library/index-tts");
   const cli = path.join(home, "indextts", "cli_v2.py");
   const ok = await fs.pathExists(cli);
   return {
@@ -67,7 +68,7 @@ async function detectIndexTts() {
 }
 
 async function detectHyperFrames() {
-  const home = process.env.HYPERFRAMES_HOME || "/Users/lizhigang/Documents/Works/Agents/Handle/html-video";
+  const home = expandHomePath(process.env.HYPERFRAMES_HOME || "~/Documents/Works/Agents/Handle/html-video");
   const cli = path.join(home, "packages", "cli", "dist", "bin.js");
   const ok = await fs.pathExists(cli);
   return {

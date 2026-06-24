@@ -85,12 +85,12 @@ GitHub 和 npm 的 README 会过滤第三方播放器脚本，因此这里使用
 
 ```bash
 cat > zhipu-brief.txt <<'EOF'
-帮我使用 make-video 以及 jianying-editor skill 制作一个关于如下主题内容的视频，根据主题到网络上采集对应的视频资源然后剪辑，配音使用 index-tts 参考语音文件使用 /Users/lizhigang/Downloads/Voices/新闻-铿锵.mp3，并给视频添加字幕和对应的动效。
+帮我使用 make-video 以及 jianying-editor skill 制作一个关于如下主题内容的视频，根据主题到网络上采集对应的视频资源然后剪辑，配音使用 index-tts 参考语音文件使用 ~/Downloads/Voices/新闻-铿锵.mp3，并给视频添加字幕和对应的动效。
 
 主题：智谱市值万亿，凭什么？
 时长：8分钟左右
-视频资源来源：参照 make-video 中的素材来源网站获取真实场景的视频、/Users/lizhigang/Downloads/Source 中的图片资源也要融合进视频内容中。
-配音：使用本地 index-tts 配合参考语音文件 /Users/lizhigang/Downloads/Voices/新闻-铿锵.mp3，配音要一次生成不要拼接
+视频资源来源：参照 make-video 中的素材来源网站获取真实场景的视频、~/Downloads/Source 中的图片资源也要融合进视频内容中。
+配音：使用本地 index-tts 配合参考语音文件 ~/Downloads/Voices/新闻-铿锵.mp3，配音要一次生成不要拼接
 字幕：添加动效字幕，字幕内容不要标点符号
 首帧封面：HP01.png
 视觉包装要求：标题动画、lower thirds、关键词/数据 callout、动态字幕、转场、避免静态文字块
@@ -111,12 +111,12 @@ npx make-video auto \
   --model deepseek-chat \
   --brief ./zhipu-brief.txt \
   --ratio 16:9 \
-  --source-dir /Users/lizhigang/Downloads/Source \
-  --voice /Users/lizhigang/Downloads/Voices/新闻-铿锵.mp3 \
+  --source-dir ~/Downloads/Source \
+  --voice ~/Downloads/Voices/新闻-铿锵.mp3 \
   --out ./zhipu-video
 ```
 
-`auto` 会从 brief 中自动识别 `主题：...` 作为素材搜索词，从 `时长：8分钟左右` 推断约 480 秒，并在 `/Users/lizhigang/Downloads/Source` 中查找 `首帧封面：HP01.png`。字幕默认去掉标点，同时生成 `subtitles.srt` 和带淡入淡出样式的 `subtitles.ass`。
+`auto` 会从 brief 中自动识别 `主题：...` 作为素材搜索词，从 `时长：8分钟左右` 推断约 480 秒，并在 `~/Downloads/Source` 中查找 `首帧封面：HP01.png`。字幕默认去掉标点，同时生成 `subtitles.srt` 和带淡入淡出样式的 `subtitles.ass`。
 
 生成 JianYing 草稿脚本后可运行：
 
@@ -139,9 +139,9 @@ npx make-video auto \
   --brief "做一个 90 秒 AI 工具演示短视频，竖屏，中文旁白，带字幕" \
   --duration 90 \
   --ratio 9:16 \
-  --source-dir /Users/lizhigang/Downloads/Source \
-  --cover /Users/lizhigang/Downloads/Source/HP01.png \
-  --voice /Users/lizhigang/Downloads/Voices/新闻-铿锵.mp3 \
+  --source-dir ~/Downloads/Source \
+  --cover ~/Downloads/Source/HP01.png \
+  --voice ~/Downloads/Voices/新闻-铿锵.mp3 \
   --out ./ai-demo
 ```
 
@@ -167,7 +167,7 @@ ai-demo/
 
 如果没有配置素材 API key，`auto` 不会中断整体规划，会在 `footage_manifest.md` 中记录可用素材站、搜索链接和版权检查提示。设置 `PEXELS_API_KEY` 或 `PIXABAY_API_KEY` 后重新运行即可自动下载素材。
 
-如果提示词中写了 `主题：...`、`时长：...分钟`、`首帧封面：...`，`auto` 会优先使用这些结构化信息。默认会尝试融合 `/Users/lizhigang/Downloads/Source` 下的图片和视频；也可以用 `--source-dir` 指定其它目录。
+如果提示词中写了 `主题：...`、`时长：...分钟`、`首帧封面：...`，`auto` 会优先使用这些结构化信息。默认会尝试融合 `~/Downloads/Source` 下的图片和视频；也可以用 `--source-dir` 指定其它目录。
 
 ### 只生成脚本和镜头规划
 

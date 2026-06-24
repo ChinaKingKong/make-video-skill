@@ -181,7 +181,7 @@ function inferTitle(brief) {
 }
 
 function resolveLocalAssetDirs(sourceDir) {
-  const dirs = [sourceDir || "/Users/lizhigang/Downloads/Source"];
+  const dirs = [sourceDir || "~/Downloads/Source"];
   return dirs.filter(Boolean).map((dir) => resolvePath(dir));
 }
 

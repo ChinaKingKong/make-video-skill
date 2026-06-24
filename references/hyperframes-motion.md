@@ -19,7 +19,7 @@ Do not route here for simple cuts, audio-only replacement, basic burned-in capti
 Prefer the local project:
 
 ```bash
-cd /Users/lizhigang/Documents/Works/Agents/Handle/html-video
+cd ~/Documents/Works/Agents/Handle/html-video
 pnpm install
 pnpm -r build
 node packages/cli/dist/bin.js doctor

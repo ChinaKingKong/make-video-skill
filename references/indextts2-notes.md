@@ -2,13 +2,13 @@
 
 ## Practical setup
 
-- Default local checkout: `/Users/lizhigang/Library/index-tts`. Prefer this via `INDEXTTS_HOME` before cloning or installing another copy.
+- Default local checkout: `~/Library/index-tts`. Prefer this via `INDEXTTS_HOME` before cloning or installing another copy.
 - This checkout has a `uv` environment, IndexTTS-2 checkpoints under `checkpoints/`, auxiliary models under `checkpoints/hf_cache/`, and has been validated on Apple MPS with a short synthesis test.
 - Prefer the CLI over WebUI for production runs. WebUI can spend a long time initializing on Apple Silicon before it starts listening.
 - Check import and device availability:
 
 ```bash
-cd "${INDEXTTS_HOME:-/Users/lizhigang/Library/index-tts}"
+cd "${INDEXTTS_HOME:-~/Library/index-tts}"
 uv run python -c "import torch, torchaudio, indextts; print(torch.__version__, torchaudio.__version__); print('mps', torch.backends.mps.is_available())"
 ```
 
