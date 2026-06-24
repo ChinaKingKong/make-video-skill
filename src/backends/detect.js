@@ -59,10 +59,10 @@ async function detectIndexTts() {
     cli,
     detail: ok
       ? `IndexTTS2 CLI found at ${cli}`
-      : "IndexTTS is optional. Set INDEXTTS_HOME to a checkout containing indextts/cli_v2.py when TTS voiceover is needed.",
+      : "IndexTTS is optional. Set INDEXTTS_HOME to a checkout containing indextts/cli_v2.py when automatic TTS voiceover is needed.",
     installHint:
-      "Install or clone IndexTTS/IndexTTS2, download checkpoints, verify it can synthesize a short WAV, then export INDEXTTS_HOME=/path/to/index-tts.",
-    degradation: "Without IndexTTS, make-video can still generate scripts, subtitles, project plans, and use user-provided audio for muxing.",
+      "Install or clone IndexTTS/IndexTTS2, download checkpoints, verify it can synthesize a short WAV, then export INDEXTTS_HOME=/path/to/index-tts. Pass --voice or set INDEXTTS_VOICE when the default reference voice is unavailable.",
+    degradation: "Without IndexTTS, make-video auto still generates scripts, subtitles, sourced base video, and a subtitle-only preview when footage is available.",
   };
 }
 

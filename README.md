@@ -11,7 +11,10 @@
 ```bash
 npx make-video --help
 npx make-video doctor
-npx make-video init ./my-video --goal "做一个 60 秒产品介绍视频" --ratio 9:16
+npx make-video auto \
+  --provider deepseek \
+  --brief "做一个 90 秒 AI 工具演示短视频，竖屏，中文旁白，带字幕" \
+  --out ./ai-demo
 ```
 
 全局安装：
@@ -39,7 +42,7 @@ npx make-video script --input article.md --out narration.txt
 
 - Node.js `>=18.20`。
 - `ffmpeg` 和 `ffprobe`，用于探测、转码、字幕烧录、音频贴合和混流。
-- IndexTTS/IndexTTS2，可选，用于生产级 TTS 和旁白修复；设置 `INDEXTTS_HOME` 指向包含 `indextts/cli_v2.py` 的 checkout。缺失时仍可生成脚本、字幕、项目规划，并使用用户提供的音频混流。
+- IndexTTS/IndexTTS2，可选，用于 `auto` 命令自动生成旁白；设置 `INDEXTTS_HOME` 指向包含 `indextts/cli_v2.py` 的 checkout。缺失时仍可生成脚本、字幕、项目规划、自动素材视频和无旁白 preview。
 - AI provider API Key，仅在运行 `plan` 或 `script` 时需要。支持 `OPENAI_API_KEY`、`DEEPSEEK_API_KEY`、`GLM_API_KEY`、`MINIMAX_API_KEY`、`ANTHROPIC_API_KEY`。
 - 素材 API Key，可选，用于自动下载 stock footage：`PEXELS_API_KEY`、`PIXABAY_API_KEY`。缺失时会写入人工 fallback 来源，不阻塞规划。
 - HyperFrames/html-video，可选，用于动效标题、数据卡、callout 和转场。
@@ -68,41 +71,54 @@ GitHub 和 npm 的 README 会过滤第三方播放器脚本，因此这里使用
 
 [打开 MP4 预览](demo/final-2-preview.mp4)
 
-## 使用示例
+## 一键生成视频
 
-下面示例演示一个不依赖 OpenAI 或 IndexTTS 的本地流程：创建项目、用已有口播稿生成字幕、把用户提供的旁白音频贴合到基础视频，并导出最终 MP4。
+`make-video auto` 是推荐入口。它的目标是不要求用户提前准备视频素材，也不要求提前准备旁白音频：CLI 会先根据主题生成脚本和镜头规划，再按主题去素材站搜索下载视频素材，生成 `render/base.mp4`、`subtitles.srt` 和 `footage_manifest.md`。
+
+自动素材下载优先使用 Pexels / Pixabay 官方 API；`references/sourcing.md` 中列出的 Mixkit、Coverr、Videvo、爱给网等素材站会作为 fallback 资源写入 `footage_manifest.md`，方便人工补充或后续自动化扩展。
+
+自动配音依赖本地 TTS 后端。配置 `INDEXTTS_HOME` 后，`auto` 会在没有现成音频时调用 IndexTTS/IndexTTS2 合成 `audio/voiceover.wav`，再把字幕和旁白一起渲染成 `exports/final.mp4`。未配置 TTS 时，CLI 会先产出口播稿、字幕、基础视频和无旁白 preview，不会要求你提前准备音频文件。
+
+### 完整自动流程
 
 ```bash
-# 1. 创建项目目录
-npx make-video init ./demo-video \
-  --goal "做一个 60 秒产品介绍视频" \
+export DEEPSEEK_API_KEY="你的 DeepSeek Key"
+export PEXELS_API_KEY="你的 Pexels Key"
+# 可选：export PIXABAY_API_KEY="你的 Pixabay Key"
+# 可选：export INDEXTTS_HOME="/path/to/index-tts"
+# 可选：export INDEXTTS_VOICE="/path/to/reference-voice.mp3"
+
+npx make-video auto \
+  --provider deepseek \
+  --model deepseek-chat \
+  --brief "做一个 90 秒 AI 工具演示短视频，竖屏，中文旁白，带字幕" \
+  --duration 90 \
   --ratio 9:16 \
-  --language zh-CN
-
-# 2. 准备素材
-# 把基础视频放到 ./demo-video/render/base.mp4
-# 把旁白音频放到 ./demo-video/audio/voiceover.wav
-# 把口播稿写入 ./demo-video/narration.txt
-
-# 3. 根据口播稿生成 SRT 字幕
-npx make-video subtitles \
-  --script ./demo-video/narration.txt \
-  --duration 60 \
-  --out ./demo-video/subtitles.srt
-
-# 4. 渲染最终视频：烧录字幕，并把旁白贴合到视频时长
-npx make-video render \
-  --project ./demo-video \
-  --video ./demo-video/render/base.mp4 \
-  --audio ./demo-video/audio/voiceover.wav \
-  --subtitles ./demo-video/subtitles.srt \
-  --out ./demo-video/exports/final.mp4
-
-# 5. 检查输出文件
-npx make-video probe ./demo-video/exports/final.mp4
+  --out ./ai-demo
 ```
 
-如果要让 AI 生成脚本和镜头规划，可以设置任意支持的 provider 后运行。默认使用 OpenAI：
+典型输出：
+
+```text
+ai-demo/
+├── brief.md
+├── script.md
+├── shot_plan.md
+├── subtitle_notes.md
+├── production_notes.md
+├── footage_manifest.md
+├── audio/voiceover.wav
+├── subtitles.srt
+├── assets/footage/
+├── render/base.mp4
+└── exports/final.mp4
+```
+
+如果没有配置素材 API key，`auto` 不会中断整体规划，会在 `footage_manifest.md` 中记录可用素材站、搜索链接和版权检查提示。设置 `PEXELS_API_KEY` 或 `PIXABAY_API_KEY` 后重新运行即可自动下载素材。
+
+### 只生成脚本和镜头规划
+
+如果只想先做策划，可以设置任意支持的 provider 后运行。默认使用 OpenAI：
 
 ```bash
 export OPENAI_API_KEY="sk-..."
@@ -139,23 +155,9 @@ npx make-video plan --provider claude --model claude-3-5-haiku-latest \
   --out ./ai-demo
 ```
 
-### 一键串联示例
+### 只下载素材并生成基础视觉轨
 
-下面命令会把 `plan`、自动素材下载、字幕和渲染串起来。若设置了 `PEXELS_API_KEY` 或 `PIXABAY_API_KEY`，CLI 会根据主题主动搜索并下载素材，生成 `render/base.mp4` 和 `footage_manifest.md`。如果没有旁白音频，流程会停在基础视频和字幕阶段，并提示你把音频放到 `./ai-demo/audio/voiceover.wav` 后再 render。
-
-```bash
-export DEEPSEEK_API_KEY="你的 DeepSeek Key"
-export PEXELS_API_KEY="你的 Pexels Key"
-# 或 export PIXABAY_API_KEY="你的 Pixabay Key"
-
-npx make-video auto --provider deepseek --model deepseek-chat \
-  --brief "做一个 90 秒 AI 工具演示短视频，竖屏，中文旁白，带字幕" \
-  --duration 90 \
-  --ratio 9:16 \
-  --out ./ai-demo
-```
-
-也可以只下载素材并生成基础视觉轨：
+如果已经有项目目录，也可以只根据主题下载素材并生成 `render/base.mp4`：
 
 ```bash
 export PEXELS_API_KEY="你的 Pexels Key"
@@ -185,7 +187,7 @@ npx make-video source \
 
 - `make-video init <dir>`：创建视频项目目录，生成 `brief.md`、`assets/`、`audio/`、`render/`、`exports/`。
 - `make-video plan --brief <text|file> --out <dir>`：调用 AI provider 生成 `brief.md`、`script.md`、`shot_plan.md`、`subtitle_notes.md` 和 `production_notes.md`。
-- `make-video auto --brief <text|file> --out <dir>`：生成计划、按主题下载素材、生成字幕，并在有旁白音频时渲染最终 MP4。
+- `make-video auto --brief <text|file> --out <dir>`：生成计划、按主题下载素材、自动尝试 TTS 配音、生成字幕，并导出有声最终 MP4；TTS 不可用但素材可用时会导出无旁白 preview。
 - `make-video script --input <file> --out narration.txt`：把文章、报告或书面稿改写成自然口播稿。
 - `make-video source --project <dir> --query <text>`：从 Pexels/Pixabay 下载素材，生成 `footage_manifest.md` 和 `render/base.mp4`。
 - `make-video subtitles --script narration.txt --duration <seconds> --out subtitles.srt`：根据口播稿和目标时长生成基础 SRT 字幕。
@@ -207,6 +209,8 @@ npx make-video source \
 - `PEXELS_API_KEY`：可选，Pexels Videos API 自动素材下载。
 - `PIXABAY_API_KEY`：可选，Pixabay Videos API 自动素材下载。
 - `INDEXTTS_HOME`：可选，指向 IndexTTS/IndexTTS2 checkout，目录内需要存在 `indextts/cli_v2.py`。
+- `INDEXTTS_VOICE` 或 `MAKE_VIDEO_TTS_VOICE`：可选，IndexTTS 自动配音使用的参考音色文件；也可在 `auto` 中传 `--voice <file>`。
+- `INDEXTTS_DEVICE`：可选，IndexTTS 设备，默认 `mps`，失败时 `auto` 会尝试退回 `cpu`。
 - `HYPERFRAMES_HOME`：可选，指向已构建的 HyperFrames/html-video checkout。
 - `JIANYING_HOME` 或 `JIANYING_EDITOR_HOME`：可选，指向 JianYing/剪映自动化后端。
 
@@ -353,7 +357,7 @@ python3 scripts/mux_tts_voiceover.py \
 本 Skill 会根据任务选择不同后端：
 
 - FFmpeg：基础剪辑、转码、字幕烧录、音频替换、混流和最终导出。
-- IndexTTS/IndexTTS2：可选增强，用于中文口播、TTS、参考音色合成和配音修复；缺失时可使用用户提供音频，或只生成脚本、字幕和镜头规划。
+- IndexTTS/IndexTTS2：可选增强，用于中文口播、TTS、参考音色合成和配音修复；`auto` 会在没有音频时自动尝试合成旁白。缺失时仍会生成脚本、字幕、素材基础视频和无旁白 preview。
 - HyperFrames/html-video：可选增强，用于 HTML/CSS/GSAP 风格动效、标题卡、数据卡、关键词字幕和转场；缺失时降级到 FFmpeg 字幕滤镜或程序化 overlay。
 - JianYing/剪映：可选增强，需要可编辑草稿、剪映原生字幕、效果、转场或人工继续精修时使用；缺失时仍可导出本地 MP4。
 - InfiniteTalk：当可见人物口型需要与新音频同步时使用。

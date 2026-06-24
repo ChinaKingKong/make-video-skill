@@ -1,6 +1,6 @@
 {
   "name": "make-video",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "AI-assisted video production CLI for planning, scripting, subtitles, FFmpeg rendering, and optional local video backends.",
   "type": "module",
   "bin": {
