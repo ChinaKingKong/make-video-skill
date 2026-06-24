@@ -1,6 +1,7 @@
 import path from "node:path";
 import fs from "fs-extra";
 import { execa } from "execa";
+import { configuredProviders } from "../ai/providers.js";
 
 export async function detectBackends() {
   const [ffmpeg, ffprobe, indexTts, hyperframes, jianying] = await Promise.all([
@@ -14,12 +15,7 @@ export async function detectBackends() {
   const backends = {
     ffmpeg,
     ffprobe,
-    openai: {
-      ok: Boolean(process.env.OPENAI_API_KEY),
-      required: false,
-      detail: process.env.OPENAI_API_KEY ? "OPENAI_API_KEY is set" : "OPENAI_API_KEY is not set",
-      degradation: "Only AI planning and narration rewrite commands are unavailable without OPENAI_API_KEY.",
-    },
+    aiProviders: configuredProviders(),
     indexTts,
     hyperframes,
     jianying,

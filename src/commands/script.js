@@ -10,16 +10,22 @@ export function registerScript(program) {
     .requiredOption("--input <file>", "source article, outline, or draft")
     .option("--out <file>", "output narration file", "narration.txt")
     .option("--language <code>", "language", "zh-CN")
-    .option("--model <model>", "OpenAI model", "gpt-4.1-mini")
+    .option("--provider <provider>", "AI provider: openai, deepseek, glm, minimax, claude", "openai")
+    .option("--model <model>", "AI model name")
+    .option("--api-key <key>", "AI provider API key; defaults to provider-specific environment variable")
+    .option("--base-url <url>", "OpenAI-compatible base URL override")
     .action(async (options) => {
       const input = await readTextFile(resolvePath(options.input));
       const out = outputPath(options.out, "narration.txt");
-      const spinner = ora("Rewriting narration with OpenAI...").start();
+      const spinner = ora(`Rewriting narration with ${options.provider}...`).start();
       try {
         const narration = await rewriteForNarration({
           input,
           language: options.language,
           model: options.model,
+          provider: options.provider,
+          apiKey: options.apiKey,
+          baseURL: options.baseUrl,
         });
         await writeTextFile(out, narration);
         spinner.succeed(`Narration written to ${out}`);

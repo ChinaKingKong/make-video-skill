@@ -1,5 +1,5 @@
-import OpenAI from "openai";
 import { z } from "zod";
+import { createChatCompletion, hasProviderKey } from "./providers.js";
 import { loadReferenceContext } from "../workflow/resources.js";
 
 const videoPlanSchema = z.object({
@@ -11,11 +11,10 @@ const videoPlanSchema = z.object({
 });
 
 export function hasOpenAIKey() {
-  return Boolean(process.env.OPENAI_API_KEY);
+  return hasProviderKey("openai");
 }
 
-export async function generateVideoPlan({ brief, language = "zh-CN", model = "gpt-4.1-mini" }) {
-  const client = createClient();
+export async function generateVideoPlan({ brief, language = "zh-CN", model, provider, apiKey, baseURL }) {
   const references = await loadReferenceContext([
     "production-workflows.md",
     "spoken-scriptwriting.md",
@@ -24,14 +23,17 @@ export async function generateVideoPlan({ brief, language = "zh-CN", model = "gp
     "qc-and-fallbacks.md",
   ]);
 
-  const response = await client.chat.completions.create({
+  const content = await createChatCompletion({
+    provider,
     model,
-    response_format: { type: "json_object" },
+    apiKey,
+    baseURL,
+    json: true,
     messages: [
       {
         role: "system",
         content:
-          "You are a senior video producer and CLI assistant. Return valid JSON only. Follow the provided production rules and do not invent unsupported factual claims.",
+          "You are a senior video producer and CLI assistant. Return valid JSON only, with no markdown fences. Follow the provided production rules and do not invent unsupported factual claims.",
       },
       {
         role: "user",
@@ -39,18 +41,17 @@ export async function generateVideoPlan({ brief, language = "zh-CN", model = "gp
       },
     ],
   });
-
-  const content = response.choices[0]?.message?.content;
-  if (!content) throw new Error("OpenAI returned an empty response.");
-  return videoPlanSchema.parse(JSON.parse(content));
+  return videoPlanSchema.parse(parseJson(content));
 }
 
-export async function rewriteForNarration({ input, language = "zh-CN", model = "gpt-4.1-mini" }) {
-  const client = createClient();
+export async function rewriteForNarration({ input, language = "zh-CN", model, provider, apiKey, baseURL }) {
   const references = await loadReferenceContext(["spoken-scriptwriting.md"]);
 
-  const response = await client.chat.completions.create({
+  const content = await createChatCompletion({
+    provider,
     model,
+    apiKey,
+    baseURL,
     messages: [
       {
         role: "system",
@@ -63,15 +64,15 @@ export async function rewriteForNarration({ input, language = "zh-CN", model = "
       },
     ],
   });
-
-  const content = response.choices[0]?.message?.content?.trim();
-  if (!content) throw new Error("OpenAI returned an empty narration.");
   return content;
 }
 
-function createClient() {
-  if (!hasOpenAIKey()) {
-    throw new Error("OPENAI_API_KEY is required for this command.");
+function parseJson(content) {
+  try {
+    return JSON.parse(content);
+  } catch {
+    const match = content.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("AI provider did not return valid JSON.");
+    return JSON.parse(match[0]);
   }
-  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 }

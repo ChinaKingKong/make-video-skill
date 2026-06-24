@@ -17,7 +17,9 @@ export function registerDoctor(program) {
 
       printStatus("ffmpeg", result.ffmpeg);
       printStatus("ffprobe", result.ffprobe);
-      printStatus("OpenAI", result.openai);
+      for (const [name, provider] of Object.entries(result.aiProviders)) {
+        printStatus(`AI:${name}`, provider);
+      }
       printStatus("IndexTTS", result.indexTts);
       printStatus("HyperFrames", result.hyperframes);
       printStatus("JianYing", result.jianying);
