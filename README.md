@@ -1,8 +1,8 @@
 # Make Video
 
-`make-video` 是一个可通过 `npx` 运行的通用 AI 视频制作 CLI，也保留为 Agent Skill。它把用户的视频需求转化为可执行的视频项目：生成 brief、口播稿、镜头规划、字幕，调用 FFmpeg 完成媒体探测、音频贴合、字幕烧录和基础渲染，并接入必需的 IndexTTS 旁白后端；如果本机存在 HyperFrames/html-video 或 JianYing/剪映，则作为可选增强启用。
+`make-video` 是一个可通过 `npx` 运行的通用 AI 视频制作 CLI，也保留为 Agent Skill。它把用户的视频需求转化为可执行的视频项目：生成 brief、口播稿、镜头规划、字幕，调用 FFmpeg 完成媒体探测、音频贴合、字幕烧录和基础渲染；如果本机存在 IndexTTS、HyperFrames/html-video 或 JianYing/剪映，则作为可选增强启用。
 
-第一版以 OpenAI 负责脚本、规划和文本生成，以 FFmpeg 负责可落地的视频处理，以 IndexTTS 负责生产级旁白。HyperFrames 和 JianYing 这类重型视频后端不随 npm 包安装，而是自动探测、可用则启用、不可用则明确降级。
+第一版以 OpenAI 负责脚本、规划和文本生成，以 FFmpeg 负责可落地的视频处理。IndexTTS、HyperFrames 和 JianYing 这类重型视频后端不随 npm 包安装，而是自动探测、可用则启用、不可用则明确降级。
 
 ## 快速开始
 
@@ -29,7 +29,7 @@ npx make-video plan --brief "做一个 90 秒 AI 工具演示短视频" --out ./
 npx make-video script --input article.md --out narration.txt
 ```
 
-基础媒体处理依赖本机安装 `ffmpeg`、`ffprobe` 和 IndexTTS。可以用 `npx make-video doctor` 检查环境；发布或 CI 前可运行 `npx make-video doctor --strict`，必需后端缺失时会返回非零退出码。
+基础媒体处理依赖本机安装 `ffmpeg` 和 `ffprobe`。可以用 `npx make-video doctor` 检查环境；发布或 CI 前可运行 `npx make-video doctor --strict`，必需后端缺失时会返回非零退出码。IndexTTS 缺失不会阻塞基础 CLI 使用。
 
 ## 系统依赖
 
@@ -37,7 +37,7 @@ npx make-video script --input article.md --out narration.txt
 
 - Node.js `>=18.20`。
 - `ffmpeg` 和 `ffprobe`，用于探测、转码、字幕烧录、音频贴合和混流。
-- IndexTTS/IndexTTS2，必需，用于生产级 TTS 和旁白修复；设置 `INDEXTTS_HOME` 指向包含 `indextts/cli_v2.py` 的 checkout。
+- IndexTTS/IndexTTS2，可选，用于生产级 TTS 和旁白修复；设置 `INDEXTTS_HOME` 指向包含 `indextts/cli_v2.py` 的 checkout。缺失时仍可生成脚本、字幕、项目规划，并使用用户提供的音频混流。
 - OpenAI API Key，仅在运行 `plan` 或 `script` 时需要。
 - HyperFrames/html-video，可选，用于动效标题、数据卡、callout 和转场。
 - JianYing/剪映后端，可选，用于生成可编辑草稿。
@@ -72,12 +72,12 @@ make-video doctor --strict
 - `make-video mux --video base.mp4 --audio voice.wav --out final.mp4`：把旁白音频贴合视频时长并替换为唯一音轨。
 - `make-video render --project <dir>`：基于项目目录执行基础 FFmpeg 渲染，支持字幕烧录和音频混流。
 - `make-video probe <file>`：输出媒体文件的 `ffprobe` JSON 信息。
-- `make-video doctor`：检查 FFmpeg、IndexTTS、OpenAI Key 和可选视频后端；`--strict` 会在必需后端缺失时失败。
+- `make-video doctor`：检查 FFmpeg、OpenAI Key、IndexTTS 和可选视频后端；`--strict` 只会在 FFmpeg/ffprobe 等必需后端缺失时失败。
 
 ## 环境变量
 
 - `OPENAI_API_KEY`：`plan` 和 `script` 命令必需。
-- `INDEXTTS_HOME`：必需，指向 IndexTTS/IndexTTS2 checkout，目录内需要存在 `indextts/cli_v2.py`。
+- `INDEXTTS_HOME`：可选，指向 IndexTTS/IndexTTS2 checkout，目录内需要存在 `indextts/cli_v2.py`。
 - `HYPERFRAMES_HOME`：可选，指向已构建的 HyperFrames/html-video checkout。
 - `JIANYING_HOME` 或 `JIANYING_EDITOR_HOME`：可选，指向 JianYing/剪映自动化后端。
 
@@ -151,7 +151,7 @@ make-video/
 
 `src/media/subtitles.js` 把口播文本按中英文可读长度切分为 SRT 字幕。
 
-`src/backends/detect.js` 探测必需后端 IndexTTS，以及 HyperFrames/html-video、JianYing/剪映等可选后端，并给出降级提示。
+`src/backends/detect.js` 探测必需后端 FFmpeg/ffprobe，以及 IndexTTS、HyperFrames/html-video、JianYing/剪映等可选后端，并给出降级提示。
 
 `src/workflow/` 负责项目目录模板和内置知识库加载。
 
@@ -224,7 +224,7 @@ python3 scripts/mux_tts_voiceover.py \
 本 Skill 会根据任务选择不同后端：
 
 - FFmpeg：基础剪辑、转码、字幕烧录、音频替换、混流和最终导出。
-- IndexTTS/IndexTTS2：必需后端，用于中文口播、TTS、参考音色合成和配音修复。
+- IndexTTS/IndexTTS2：可选增强，用于中文口播、TTS、参考音色合成和配音修复；缺失时可使用用户提供音频，或只生成脚本、字幕和镜头规划。
 - HyperFrames/html-video：可选增强，用于 HTML/CSS/GSAP 风格动效、标题卡、数据卡、关键词字幕和转场；缺失时降级到 FFmpeg 字幕滤镜或程序化 overlay。
 - JianYing/剪映：可选增强，需要可编辑草稿、剪映原生字幕、效果、转场或人工继续精修时使用；缺失时仍可导出本地 MP4。
 - InfiniteTalk：当可见人物口型需要与新音频同步时使用。

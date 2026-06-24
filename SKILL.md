@@ -5,7 +5,7 @@ description: Create, edit, package, or repair videos. Use for videos, social cli
 
 # Make Video
 
-This skill is also packaged as the `make-video` npm CLI. Users can run `npx make-video --help` for a general-purpose video production command line tool that creates project workspaces, generates scripts and shot plans with OpenAI, builds SRT subtitles, probes media, replaces or fits voiceover audio, and performs basic FFmpeg renders. IndexTTS is a required production voiceover backend; HyperFrames/html-video and JianYing are optional enhancement backends with documented fallback behavior. Treat the CLI as the public automation surface and the references below as the production knowledge base.
+This skill is also packaged as the `make-video` npm CLI. Users can run `npx make-video --help` for a general-purpose video production command line tool that creates project workspaces, generates scripts and shot plans with OpenAI, builds SRT subtitles, probes media, replaces or fits voiceover audio, and performs basic FFmpeg renders. IndexTTS, HyperFrames/html-video, and JianYing are optional enhancement backends with documented fallback behavior. Treat the CLI as the public automation surface and the references below as the production knowledge base.
 
 ## Boundary
 
@@ -26,7 +26,7 @@ Use for video files, edited media, fitted audio, subtitles, layered renders, lip
 - CLI implementation: `src/cli.js` and `src/commands/`
 - FFmpeg media engine: `src/media/ffmpeg.js`
 - OpenAI planning adapter: `src/ai/openai.js`
-- Backend detection: `src/backends/detect.js` (IndexTTS required; HyperFrames/JianYing optional)
+- Backend detection: `src/backends/detect.js` (FFmpeg/ffprobe required; IndexTTS/HyperFrames/JianYing optional)
 - Production/project layout: `references/production-workflows.md`
 - Article/written draft to natural spoken narration: `references/spoken-scriptwriting.md`
 - Footage and license-aware source routing: `references/sourcing.md`

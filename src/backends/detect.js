@@ -27,7 +27,7 @@ export async function detectBackends() {
 
   return {
     ...backends,
-    requiredOk: [ffmpeg, ffprobe, indexTts].every((backend) => backend.ok),
+    requiredOk: [ffmpeg, ffprobe].every((backend) => backend.ok),
   };
 }
 
@@ -54,14 +54,15 @@ async function detectIndexTts() {
   const ok = await fs.pathExists(cli);
   return {
     ok,
-    required: true,
+    required: false,
     home,
     cli,
     detail: ok
       ? `IndexTTS2 CLI found at ${cli}`
-      : "IndexTTS is required for make-video production voiceover. Set INDEXTTS_HOME to a checkout containing indextts/cli_v2.py.",
+      : "IndexTTS is optional. Set INDEXTTS_HOME to a checkout containing indextts/cli_v2.py when TTS voiceover is needed.",
     installHint:
       "Install or clone IndexTTS/IndexTTS2, download checkpoints, verify it can synthesize a short WAV, then export INDEXTTS_HOME=/path/to/index-tts.",
+    degradation: "Without IndexTTS, make-video can still generate scripts, subtitles, project plans, and use user-provided audio for muxing.",
   };
 }
 
