@@ -1,8 +1,53 @@
-# Make Video Skill
+# Make Video
 
-`make-video` 是一个面向 Agent 的通用视频制作 Skill，用于把用户的视频需求转化为可执行的制作流程和最终交付文件。它覆盖从 brief 澄清、口播稿改写、素材搜集、配音、字幕、动效、剪映草稿，到最终 `final.mp4` 导出的完整链路。
+`make-video` 是一个可通过 `npx` 运行的通用 AI 视频制作 CLI，也保留为 Agent Skill。它把用户的视频需求转化为可执行的视频项目：生成 brief、口播稿、镜头规划、字幕，调用 FFmpeg 完成媒体探测、音频贴合、字幕烧录和基础渲染，并接入必需的 IndexTTS 旁白后端；如果本机存在 HyperFrames/html-video 或 JianYing/剪映，则作为可选增强启用。
 
-这个项目不是传统意义上的单一视频编辑程序，而是一套视频生产规范、路由规则、后端集成说明和辅助脚本。Agent 读取这些规则后，可以根据任务类型选择本地 FFmpeg 渲染、HyperFrames/html-video 动效层、JianYing/剪映草稿、IndexTTS 配音或混合流程。
+第一版以 OpenAI 负责脚本、规划和文本生成，以 FFmpeg 负责可落地的视频处理，以 IndexTTS 负责生产级旁白。HyperFrames 和 JianYing 这类重型视频后端不随 npm 包安装，而是自动探测、可用则启用、不可用则明确降级。
+
+## 快速开始
+
+临时运行：
+
+```bash
+npx make-video --help
+npx make-video doctor
+npx make-video init ./my-video --goal "做一个 60 秒产品介绍视频" --ratio 9:16
+```
+
+全局安装：
+
+```bash
+npm install -g make-video
+make-video doctor --strict
+```
+
+需要 AI 规划或口播改写时，先设置 OpenAI Key：
+
+```bash
+export OPENAI_API_KEY="sk-..."
+npx make-video plan --brief "做一个 90 秒 AI 工具演示短视频" --out ./ai-demo
+npx make-video script --input article.md --out narration.txt
+```
+
+基础媒体处理依赖本机安装 `ffmpeg`、`ffprobe` 和 IndexTTS。可以用 `npx make-video doctor` 检查环境；发布或 CI 前可运行 `npx make-video doctor --strict`，必需后端缺失时会返回非零退出码。
+
+## 系统依赖
+
+`make-video` 是一个 Node.js CLI，但视频生产依赖本机工具链：
+
+- Node.js `>=18.20`。
+- `ffmpeg` 和 `ffprobe`，用于探测、转码、字幕烧录、音频贴合和混流。
+- IndexTTS/IndexTTS2，必需，用于生产级 TTS 和旁白修复；设置 `INDEXTTS_HOME` 指向包含 `indextts/cli_v2.py` 的 checkout。
+- OpenAI API Key，仅在运行 `plan` 或 `script` 时需要。
+- HyperFrames/html-video，可选，用于动效标题、数据卡、callout 和转场。
+- JianYing/剪映后端，可选，用于生成可编辑草稿。
+
+环境检查：
+
+```bash
+make-video doctor
+make-video doctor --strict
+```
 
 ## 适用场景
 
@@ -17,6 +62,24 @@
 - 在需要精致动效时接入 HyperFrames/html-video 渲染标题卡、字幕动效、callout 和转场。
 
 不适合的任务包括纯文本写作、单张图片生成、泛泛的视频建议、只做资料研究但不产出媒体文件的请求。
+
+## CLI 命令
+
+- `make-video init <dir>`：创建视频项目目录，生成 `brief.md`、`assets/`、`audio/`、`render/`、`exports/`。
+- `make-video plan --brief <text|file> --out <dir>`：调用 OpenAI 生成 `brief.md`、`script.md`、`shot_plan.md`、`subtitle_notes.md` 和 `production_notes.md`。
+- `make-video script --input <file> --out narration.txt`：把文章、报告或书面稿改写成自然口播稿。
+- `make-video subtitles --script narration.txt --duration <seconds> --out subtitles.srt`：根据口播稿和目标时长生成基础 SRT 字幕。
+- `make-video mux --video base.mp4 --audio voice.wav --out final.mp4`：把旁白音频贴合视频时长并替换为唯一音轨。
+- `make-video render --project <dir>`：基于项目目录执行基础 FFmpeg 渲染，支持字幕烧录和音频混流。
+- `make-video probe <file>`：输出媒体文件的 `ffprobe` JSON 信息。
+- `make-video doctor`：检查 FFmpeg、IndexTTS、OpenAI Key 和可选视频后端；`--strict` 会在必需后端缺失时失败。
+
+## 环境变量
+
+- `OPENAI_API_KEY`：`plan` 和 `script` 命令必需。
+- `INDEXTTS_HOME`：必需，指向 IndexTTS/IndexTTS2 checkout，目录内需要存在 `indextts/cli_v2.py`。
+- `HYPERFRAMES_HOME`：可选，指向已构建的 HyperFrames/html-video checkout。
+- `JIANYING_HOME` 或 `JIANYING_EDITOR_HOME`：可选，指向 JianYing/剪映自动化后端。
 
 ## 核心工作流
 
@@ -34,6 +97,17 @@ Skill 的主流程定义在 `SKILL.md` 和 `references/production-workflows.md` 
 
 ```text
 make-video/
+├── package.json
+├── bin/
+│   └── make-video.js
+├── src/
+│   ├── cli.js
+│   ├── ai/
+│   ├── backends/
+│   ├── commands/
+│   ├── media/
+│   ├── utils/
+│   └── workflow/
 ├── SKILL.md
 ├── manifest.json
 ├── agents/
@@ -59,9 +133,27 @@ make-video/
 
 ### 顶层配置
 
+`package.json` 定义 npm 包名、`npx make-video` 的 bin 入口、运行依赖、发布白名单和 smoke test。
+
+`bin/make-video.js` 是可执行入口，负责启动 `src/cli.js`。
+
 `SKILL.md` 是 Skill 的主入口，定义触发边界、核心流程、参考文档索引、质量规则和最终响应契约。
 
 `manifest.json` 描述项目元信息，包括名称、版本、维护者、生产状态、目标平台和组件构成。
+
+### CLI 实现层
+
+`src/cli.js` 注册所有命令，并把参数交给 `src/commands/` 下的具体实现。
+
+`src/ai/openai.js` 封装 OpenAI 调用，用内置 `references/` 作为上下文生成视频规划和口播稿。
+
+`src/media/ffmpeg.js` 封装 `ffmpeg` 和 `ffprobe`，提供媒体探测、音频贴合、音轨替换、字幕烧录和基础转码能力。
+
+`src/media/subtitles.js` 把口播文本按中英文可读长度切分为 SRT 字幕。
+
+`src/backends/detect.js` 探测必需后端 IndexTTS，以及 HyperFrames/html-video、JianYing/剪映等可选后端，并给出降级提示。
+
+`src/workflow/` 负责项目目录模板和内置知识库加载。
 
 ### Agent 适配层
 
@@ -132,9 +224,9 @@ python3 scripts/mux_tts_voiceover.py \
 本 Skill 会根据任务选择不同后端：
 
 - FFmpeg：基础剪辑、转码、字幕烧录、音频替换、混流和最终导出。
-- IndexTTS/IndexTTS2：中文口播、TTS、参考音色合成和配音修复。
-- HyperFrames/html-video：HTML/CSS/GSAP 风格动效、标题卡、数据卡、关键词字幕和转场。
-- JianYing/剪映：需要可编辑草稿、剪映原生字幕、效果、转场或人工继续精修时使用。
+- IndexTTS/IndexTTS2：必需后端，用于中文口播、TTS、参考音色合成和配音修复。
+- HyperFrames/html-video：可选增强，用于 HTML/CSS/GSAP 风格动效、标题卡、数据卡、关键词字幕和转场；缺失时降级到 FFmpeg 字幕滤镜或程序化 overlay。
+- JianYing/剪映：可选增强，需要可编辑草稿、剪映原生字幕、效果、转场或人工继续精修时使用；缺失时仍可导出本地 MP4。
 - InfiniteTalk：当可见人物口型需要与新音频同步时使用。
 
 ## 质量控制
@@ -158,3 +250,15 @@ Skill 要求最终交付前进行媒体验证：
 - 可复用的本地工具脚本放入 `scripts/`。
 
 项目特定的视频工程文件不应该写进本 Skill 目录，应放在每次视频任务自己的项目文件夹中，避免污染通用 Skill。
+
+## 发布检查
+
+维护者发布 npm 包前建议运行：
+
+```bash
+npm run smoke
+npm pack --dry-run
+npm publish
+```
+
+`package.json` 使用 `files` 白名单发布 CLI 源码、内置 references、Agent Skill 入口和文档，不发布 `node_modules`、本地视频工程、媒体素材或临时渲染产物。

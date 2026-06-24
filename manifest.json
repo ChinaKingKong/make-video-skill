@@ -1,6 +1,6 @@
 {
   "name": "make-video",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "owner": "lizhigang",
   "updated_at": "2026-06-24",
   "status": "active",
@@ -11,10 +11,15 @@
   "category": "media-production",
   "complexity_tier": "complex",
   "target_platforms": [
+    "npm",
+    "npx",
+    "node-cli",
     "openai",
     "agent-skills-compatible"
   ],
   "factory_components": [
+    "bin",
+    "src",
     "agents",
     "references",
     "scripts",

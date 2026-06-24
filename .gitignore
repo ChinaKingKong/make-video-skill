@@ -1,0 +1,20 @@
+node_modules/
+npm-debug.log*
+
+# Local video project outputs
+exports/
+render/
+audio/
+assets/
+sources/
+*.mp4
+*.mov
+*.mkv
+*.webm
+*.wav
+*.mp3
+*.aac
+
+# Local environment
+.env
+.env.*

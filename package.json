@@ -1,0 +1,54 @@
+{
+  "name": "make-video",
+  "version": "1.2.0",
+  "description": "AI-assisted video production CLI for planning, scripting, subtitles, FFmpeg rendering, and optional local video backends.",
+  "type": "module",
+  "bin": {
+    "make-video": "bin/make-video.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "references/",
+    "agents/",
+    "evals/",
+    "scripts/",
+    "SKILL.md",
+    "README.md",
+    "manifest.json"
+  ],
+  "scripts": {
+    "start": "node ./bin/make-video.js",
+    "smoke": "node ./bin/make-video.js --help && node ./bin/make-video.js doctor --json"
+  },
+  "keywords": [
+    "video",
+    "ffmpeg",
+    "ai-video",
+    "subtitles",
+    "tts",
+    "cli",
+    "npx"
+  ],
+  "author": "lizhigang",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChinaKingKong/make-video-skill.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ChinaKingKong/make-video-skill/issues"
+  },
+  "homepage": "https://github.com/ChinaKingKong/make-video-skill#readme",
+  "engines": {
+    "node": ">=18.20"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "execa": "latest",
+    "fs-extra": "latest",
+    "openai": "latest",
+    "ora": "latest",
+    "zod": "latest"
+  }
+}
