@@ -1,7 +1,7 @@
 import path from "node:path";
 import { writeTextFile } from "../utils/io.js";
 
-export async function writeFootageManifest({ projectDir, query, downloads, providerResults, fallbackSources }) {
+export async function writeFootageManifest({ projectDir, query, downloads, localAssets = [], cover, providerResults, fallbackSources }) {
   const lines = [
     "# Footage Manifest",
     "",
@@ -26,6 +26,19 @@ export async function writeFootageManifest({ projectDir, query, downloads, provi
       lines.push(`- Reuse caveat: verify current source terms before commercial reuse.`);
       lines.push("");
     }
+  }
+
+  lines.push("## Local Visual Assets", "");
+  if (cover) {
+    lines.push(`- Cover: \`${path.relative(projectDir, cover)}\``);
+  }
+  if (localAssets.length === 0) {
+    lines.push("No local visual assets were imported.", "");
+  } else {
+    for (const item of localAssets) {
+      lines.push(`- \`${item.file}\` — ${item.license}`);
+    }
+    lines.push("");
   }
 
   lines.push("## Provider Status", "");

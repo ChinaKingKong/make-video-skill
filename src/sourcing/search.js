@@ -23,6 +23,8 @@ export async function searchFootage({ query, count = 5, ratio = "16:9" }) {
 export function extractSearchQuery({ query, brief, shotPlan }) {
   if (query) return query;
   const source = `${brief || ""}\n${shotPlan || ""}`;
+  const topic = source.match(/主题[：:]\s*([^\n]+)/u);
+  if (topic?.[1]) return topic[1].trim();
   const match = source.match(/(?:AI|人工智能|工具|产品|科技|演示|短视频|数据|创作者|自动化)[^\n。；;]{0,30}/i);
   return (match?.[0] || source.split(/\s|\n|。|，/).filter(Boolean).slice(0, 8).join(" ") || "technology product demo").trim();
 }

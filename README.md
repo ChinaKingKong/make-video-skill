@@ -94,6 +94,9 @@ npx make-video auto \
   --brief "做一个 90 秒 AI 工具演示短视频，竖屏，中文旁白，带字幕" \
   --duration 90 \
   --ratio 9:16 \
+  --source-dir /Users/lizhigang/Downloads/Source \
+  --cover /Users/lizhigang/Downloads/Source/HP01.png \
+  --voice /Users/lizhigang/Downloads/Voices/新闻-铿锵.mp3 \
   --out ./ai-demo
 ```
 
@@ -111,10 +114,21 @@ ai-demo/
 ├── subtitles.srt
 ├── assets/footage/
 ├── render/base.mp4
-└── exports/final.mp4
+├── exports/final.mp4
+└── jianying/
+    ├── storyboard.json
+    └── build_draft.py
 ```
 
 如果没有配置素材 API key，`auto` 不会中断整体规划，会在 `footage_manifest.md` 中记录可用素材站、搜索链接和版权检查提示。设置 `PEXELS_API_KEY` 或 `PIXABAY_API_KEY` 后重新运行即可自动下载素材。
+
+如果提示词中写了 `时长：8分钟左右`，`auto` 会在未显式传 `--duration` 时自动推断为约 480 秒；写了 `主题：...` 时，会优先用主题行生成素材搜索词。默认会尝试融合 `/Users/lizhigang/Downloads/Source` 下的图片和视频；也可以用 `--source-dir` 指定其它目录。字幕默认去掉标点，并额外生成带淡入淡出样式的 `subtitles.ass` 用于 FFmpeg 预览渲染，同时保留无标点 `subtitles.srt` 供 JianYing 导入。
+
+生成 JianYing 草稿脚本后可运行：
+
+```bash
+python ./ai-demo/jianying/build_draft.py
+```
 
 ### 只生成脚本和镜头规划
 
@@ -187,7 +201,7 @@ npx make-video source \
 
 - `make-video init <dir>`：创建视频项目目录，生成 `brief.md`、`assets/`、`audio/`、`render/`、`exports/`。
 - `make-video plan --brief <text|file> --out <dir>`：调用 AI provider 生成 `brief.md`、`script.md`、`shot_plan.md`、`subtitle_notes.md` 和 `production_notes.md`。
-- `make-video auto --brief <text|file> --out <dir>`：生成计划、按主题下载素材、自动尝试 TTS 配音、生成字幕，并导出有声最终 MP4；TTS 不可用但素材可用时会导出无旁白 preview。
+- `make-video auto --brief <text|file> --out <dir>`：生成计划、按主题下载素材、融合本地图片/封面、自动尝试 TTS 配音、生成无标点字幕和 ASS 动效字幕，并导出有声最终 MP4；TTS 不可用但素材可用时会导出无旁白 preview，同时生成 JianYing 草稿脚本。
 - `make-video script --input <file> --out narration.txt`：把文章、报告或书面稿改写成自然口播稿。
 - `make-video source --project <dir> --query <text>`：从 Pexels/Pixabay 下载素材，生成 `footage_manifest.md` 和 `render/base.mp4`。
 - `make-video subtitles --script narration.txt --duration <seconds> --out subtitles.srt`：根据口播稿和目标时长生成基础 SRT 字幕。

@@ -13,6 +13,8 @@ export function registerSource(program) {
     .option("--count <number>", "maximum clips to download", "5")
     .option("--ratio <ratio>", "target aspect ratio", "16:9")
     .option("--duration <seconds>", "target base video duration", "90")
+    .option("--source-dir <dir>", "local image/video asset directory to blend into the base video")
+    .option("--cover <file>", "cover image used as the first frame")
     .action(async (options) => {
       const projectDir = resolvePath(options.project);
       if (!(await fs.pathExists(projectDir))) {
@@ -24,6 +26,8 @@ export function registerSource(program) {
         count: Number.parseInt(options.count, 10),
         ratio: options.ratio,
         duration: Number.parseFloat(options.duration),
+        localAssetDirs: [options.sourceDir].filter(Boolean).map((dir) => resolvePath(dir)),
+        cover: options.cover && resolvePath(options.cover),
       });
       printJson(result);
     });
