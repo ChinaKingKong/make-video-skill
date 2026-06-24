@@ -14,6 +14,9 @@ sources/
 *.wav
 *.mp3
 *.aac
+!demo/
+!demo/final-preview.mp4
+!demo/final-2-preview.mp4
 
 # Local environment
 .env

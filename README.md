@@ -49,6 +49,65 @@ make-video doctor
 make-video doctor --strict
 ```
 
+## Demo 视频
+
+下面是 `demo/` 目录中两个完整视频的轻量预览版，方便在 GitHub 或 npm 页面快速查看效果。原始完整视频体积较大，不随包发布。
+
+### Demo 1
+
+<video src="demo/final-preview.mp4" controls muted playsinline width="720"></video>
+
+[无法播放时打开视频文件](demo/final-preview.mp4)
+
+### Demo 2
+
+<video src="demo/final-2-preview.mp4" controls muted playsinline width="720"></video>
+
+[无法播放时打开视频文件](demo/final-2-preview.mp4)
+
+## 使用示例
+
+下面示例演示一个不依赖 OpenAI 或 IndexTTS 的本地流程：创建项目、用已有口播稿生成字幕、把用户提供的旁白音频贴合到基础视频，并导出最终 MP4。
+
+```bash
+# 1. 创建项目目录
+npx make-video init ./demo-video \
+  --goal "做一个 60 秒产品介绍视频" \
+  --ratio 9:16 \
+  --language zh-CN
+
+# 2. 准备素材
+# 把基础视频放到 ./demo-video/render/base.mp4
+# 把旁白音频放到 ./demo-video/audio/voiceover.wav
+# 把口播稿写入 ./demo-video/narration.txt
+
+# 3. 根据口播稿生成 SRT 字幕
+npx make-video subtitles \
+  --script ./demo-video/narration.txt \
+  --duration 60 \
+  --out ./demo-video/subtitles.srt
+
+# 4. 渲染最终视频：烧录字幕，并把旁白贴合到视频时长
+npx make-video render \
+  --project ./demo-video \
+  --video ./demo-video/render/base.mp4 \
+  --audio ./demo-video/audio/voiceover.wav \
+  --subtitles ./demo-video/subtitles.srt \
+  --out ./demo-video/exports/final.mp4
+
+# 5. 检查输出文件
+npx make-video probe ./demo-video/exports/final.mp4
+```
+
+如果要让 AI 生成脚本和镜头规划，可以设置 `OPENAI_API_KEY` 后运行：
+
+```bash
+export OPENAI_API_KEY="sk-..."
+npx make-video plan \
+  --brief "做一个 90 秒 AI 工具演示短视频，竖屏，中文旁白，带字幕" \
+  --out ./ai-demo
+```
+
 ## 适用场景
 
 适合使用本 Skill 的任务包括：
